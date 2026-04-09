@@ -28,7 +28,7 @@ export default function Dashboard({ priceData, candles, trades }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', fontWeight: 400 }}>
-            Good morning, John
+            Good morning, Maaz
           </h1>
           <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 4 }}>
             Gold is {up ? 'up' : 'down'} {Math.abs(priceData.changePct).toFixed(2)}% today — markets look {up ? 'bullish' : 'cautious'}.

@@ -77,7 +77,7 @@ export default function Sidebar({ page, setPage, priceData }) {
         <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,var(--gold),var(--gold-light))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#fff', fontWeight: 600 }}>JD</div>
           <div>
-            <div style={{ fontSize: 12, color: 'var(--text)' }}>John Doe</div>
+            <div style={{ fontSize: 12, color: 'var(--text)' }}>Maaz</div>
             <div style={{ fontSize: 10, color: 'var(--text3)' }}>Day Trader</div>
           </div>
         </div>
