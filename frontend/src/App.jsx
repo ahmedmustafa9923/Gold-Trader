@@ -14,23 +14,18 @@ export function useBreakpoint() {
     const w = window.innerWidth
     if (w <= 200) return 'watch'
     if (w <= 480) return 'phone'
-    if (w <= 767) return 'phoneLandscape'
+    if (w <= 850) return 'phoneLandscape'
     if (w <= 1024) return 'tablet'
     return 'desktop'
   }
   const [bp, setBp] = useState('phone')
-
   useEffect(() => {
     setBp(getBreakpoint())
     const handler = () => setBp(getBreakpoint())
     window.addEventListener('resize', handler)
-    window.addEventListener('orientationchange', () => setTimeout(handler, 150))
-    return () => {
-      window.removeEventListener('resize', handler)
-      window.removeEventListener('orientationchange', handler)
-    }
+    window.addEventListener('orientationchange', () => setTimeout(handler, 200))
+    return () => window.removeEventListener('resize', handler)
   }, [])
-
   return bp
 }
 
@@ -50,11 +45,6 @@ export default function App() {
   const isPortrait = bp === 'phone' || bp === 'watch'
   const isLandscape = bp === 'phoneLandscape'
   const isTablet = bp === 'tablet'
-  const isMobile = isPortrait || isLandscape
-
-  const showBottomNav = isPortrait
-  const showSidebar = !isPortrait
-  const showHamburger = isPortrait
 
   useEffect(() => {
     if (!isPortrait) setSidebarOpen(false)
@@ -83,36 +73,56 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+
+      {/* Overlay for portrait sidebar */}
       {sidebarOpen && isPortrait && (
-        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 40 }} />
+        <div onClick={() => setSidebarOpen(false)} style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 45
+        }} />
       )}
-      {(showSidebar || sidebarOpen) && (
-        <Sidebar page={page} setPage={(p) => { setPage(p); setSidebarOpen(false) }}
+
+      {/* Sidebar — always show in landscape/tablet/desktop, overlay in portrait */}
+      {(isLandscape || isTablet || bp === 'desktop' || sidebarOpen) && (
+        <Sidebar
+          page={page}
+          setPage={(p) => { setPage(p); setSidebarOpen(false) }}
           priceData={priceData} bp={bp}
           isOverlay={sidebarOpen && isPortrait}
           onClose={() => setSidebarOpen(false)}
-          isTablet={isTablet || isLandscape} />
+          isTablet={isTablet || isLandscape}
+        />
       )}
+
       <main style={{
         flex: 1, overflow: 'auto', background: 'var(--bg)',
-        paddingBottom: showBottomNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0,
+        paddingBottom: isPortrait ? 'calc(64px + env(safe-area-inset-bottom))' : 0,
         minWidth: 0,
       }}>
-        {showHamburger && (
+
+        {/* Portrait top bar with burger */}
+        {isPortrait && (
           <div style={{
             position: 'sticky', top: 0, zIndex: 30,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 16px',
-            paddingTop: 'calc(12px + env(safe-area-inset-top))',
+            padding: '0 16px',
+            height: 56,
             background: 'var(--bg2)',
             borderBottom: '1px solid var(--border)',
           }}>
-            <button onClick={() => setSidebarOpen(true)} style={{
-              background: 'transparent', border: 'none', color: 'var(--text)',
-              fontSize: 20, minWidth: 44, minHeight: 44,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>☰</button>
-            <span style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-light)', fontSize: 16, letterSpacing: 1 }}>AURUM</span>
+            <button
+              onClick={() => setSidebarOpen(v => !v)}
+              style={{
+                background: 'transparent', border: 'none',
+                color: 'var(--text)', fontSize: 22,
+                width: 44, height: 44,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', zIndex: 50,
+              }}>☰</button>
+            <span style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--gold-light)', fontSize: 16, letterSpacing: 1
+            }}>AURUM</span>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 13, fontFamily: 'var(--font-mono)', color: 'var(--text)' }}>
                 ${priceData.price?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -123,6 +133,7 @@ export default function App() {
             </div>
           </div>
         )}
+
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 16 }}>
             <div style={{ width: 40, height: 40, border: '2px solid var(--border2)', borderTopColor: 'var(--gold)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -132,14 +143,17 @@ export default function App() {
         ) : (
           <>
             {page === 'dashboard' && <Dashboard {...pageProps} />}
-            {page === 'trade' && <DayTrade {...pageProps} />}
-            {page === 'history' && <History {...pageProps} />}
-            {page === 'ai' && <AIAdvisor {...pageProps} />}
-            {page === 'deposit' && <Deposit {...pageProps} />}
+            {page === 'trade'     && <DayTrade  {...pageProps} />}
+            {page === 'history'   && <History   {...pageProps} />}
+            {page === 'ai'        && <AIAdvisor {...pageProps} />}
+            {page === 'deposit'   && <Deposit   {...pageProps} />}
           </>
         )}
       </main>
-      {showBottomNav && <BottomNav page={page} setPage={setPage} />}
+
+      {/* Bottom nav — portrait only */}
+      {isPortrait && <BottomNav page={page} setPage={setPage} />}
+
     </div>
   )
 }
