@@ -10,27 +10,27 @@ import Deposit from './pages/Deposit.jsx'
 const API = '/api'
 
 export function useBreakpoint() {
-  const [bp, setBp] = useState(() => {
+  const getBreakpoint = () => {
     const w = window.innerWidth
     if (w <= 200) return 'watch'
     if (w <= 480) return 'phone'
     if (w <= 767) return 'phoneLandscape'
     if (w <= 1024) return 'tablet'
     return 'desktop'
-  })
+  }
+  const [bp, setBp] = useState('phone')
+
   useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth
-      if (w <= 200) setBp('watch')
-      else if (w <= 480) setBp('phone')
-      else if (w <= 767) setBp('phoneLandscape')
-      else if (w <= 1024) setBp('tablet')
-      else setBp('desktop')
+    setBp(getBreakpoint())
+    const handler = () => setBp(getBreakpoint())
+    window.addEventListener('resize', handler)
+    window.addEventListener('orientationchange', () => setTimeout(handler, 150))
+    return () => {
+      window.removeEventListener('resize', handler)
+      window.removeEventListener('orientationchange', handler)
     }
-    window.addEventListener('resize', calc)
-    window.addEventListener('orientationchange', () => setTimeout(calc, 100))
-    return () => window.removeEventListener('resize', calc)
   }, [])
+
   return bp
 }
 
@@ -46,8 +46,8 @@ export default function App() {
   const [trades, setTrades] = useState([])
   const [loading, setLoading] = useState(true)
   const bp = useBreakpoint()
-  const isMobile = bp === 'phone' || bp === 'watch'
-  const isTablet = bp === 'tablet' || bp === 'phoneLandscape'
+  const isMobile = bp === 'phone' || bp === 'watch' || bp === 'phoneLandscape'
+  const isTablet = bp === 'tablet'
   const showBottomNav = isMobile
 
   const fetchPrice = useCallback(async () => {
@@ -84,14 +84,15 @@ export default function App() {
       <main style={{
         flex: 1, overflow: 'auto', background: 'var(--bg)',
         paddingBottom: showBottomNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0,
-        paddingTop: isMobile ? 'env(safe-area-inset-top)' : 0,
         minWidth: 0,
       }}>
         {isMobile && (
           <div style={{
             position: 'sticky', top: 0, zIndex: 30,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 16px', background: 'var(--bg2)',
+            padding: '12px 16px',
+            paddingTop: 'calc(12px + env(safe-area-inset-top))',
+            background: 'var(--bg2)',
             borderBottom: '1px solid var(--border)',
           }}>
             <button onClick={() => setSidebarOpen(true)} style={{
